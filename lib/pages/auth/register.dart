@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:demo/common/request.dart';
 
 class Register extends StatefulWidget {
   Register({Key key}) : super(key: key);
@@ -16,6 +17,12 @@ class _RegisterState extends State<Register> {
   Timer codeTimer;
   String codeText = '获取验证码';
   int maxTime = 10;
+
+  Map<String, dynamic> formData = {
+    'mobile': '',
+    'password': '',
+    'code': '',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,7 @@ class _RegisterState extends State<Register> {
               padding: EdgeInsets.all(10.0),
             ),
             TextFormField(
-              maxLength: 16,
+              maxLength: 11,
               validator: (val) {
                 if (val.length < 4) {
                   return '至少4个字符';
@@ -47,10 +54,12 @@ class _RegisterState extends State<Register> {
               decoration: InputDecoration(
                 prefix: Text('+86')
               ),
+              onChanged: (val){
+                formData['mobile'] = val;
+              },
             ),
             TextField(
-              
-              maxLength: 4,
+              maxLength: 6,
               obscureText: false,
               decoration: InputDecoration(
                 helperText: '请输入验证码',
@@ -61,6 +70,9 @@ class _RegisterState extends State<Register> {
                 ),
                 
               ),
+              onChanged: (val) {
+                formData['code'] = val;
+              },
             ),
             TextField(
               maxLength: 16,
@@ -73,18 +85,26 @@ class _RegisterState extends State<Register> {
                   onPressed: _toggleType,
                 )
               ),
+              onChanged: (val) {
+                formData['password'] = val;
+              },
             ),
             FlatButton(
               onPressed: _submit,
               color: Colors.pink,
-              
               child: Text(
                 '确定',
                 style: TextStyle(
                   color: Colors.white,
                 ),
               ),
-            )
+            ),
+            FlatButton(
+              onPressed: (){
+                Navigator.pushNamed(context, '/login');
+              },
+              child: Text('登录'),
+            ),
            ],),
          ),
        ),
@@ -99,7 +119,11 @@ class _RegisterState extends State<Register> {
   }
 
   void _submit() {
-
+    DioUtils
+      .post('register', data: this.formData)
+      .then((res){
+        print(res);
+      });
   }
 
   void _getCode() {
@@ -111,18 +135,28 @@ class _RegisterState extends State<Register> {
       );
       return;
     }
-    codeTimer = Timer.periodic(Duration(seconds: 1), (timer){
-      setState(() {
-        maxTime--;
-        codeText = '剩余$maxTime秒';
-        if (maxTime < 1) {
-          codeTimer.cancel();
-          codeTimer = null;
-          maxTime = 10;
-          codeText = '重新获取';
-        }
+    DioUtils.put('/register', data: {
+      'mobile': formData['mobile']
+    }).then((r){
+      print('ok');
+      print(r);
+      codeTimer = Timer.periodic(Duration(seconds: 1), (timer){
+        setState(() {
+          maxTime--;
+          codeText = '剩余$maxTime秒';
+          if (maxTime < 1) {
+            codeTimer.cancel();
+            codeTimer = null;
+            maxTime = 10;
+            codeText = "重新获取";
+          }
+        });
       });
+    }).catchError((err){
+      print('err');
+      print(err);
     });
+    
   }
 
   @override

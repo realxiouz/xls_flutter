@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'package:demo/common/base.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/cupertino.dart';
 
 class ShopPage extends StatefulWidget {
@@ -13,10 +13,9 @@ class ShopPage extends StatefulWidget {
   _ShopPageState createState() => _ShopPageState();
 }
 
-class _ShopPageState extends State<ShopPage> {
+class _ShopPageState extends State<ShopPage> with Base, AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.instance = ScreenUtil(width: 750, height: 1344)..init(context);
     return Container(
        child: Scaffold(
          body: FutureBuilder(
@@ -34,7 +33,7 @@ class _ShopPageState extends State<ShopPage> {
                  child: Column(
                   children: <Widget>[
                     Container(
-                      height: ScreenUtil.getInstance().setHeight(540),
+                      height: Base.h(270),
                       child: Swiper(
                         itemCount: swiper.length,
                         itemBuilder: (ctx, inx) => Image.network(swiper[inx]['image'], fit: BoxFit.fill),
@@ -71,6 +70,9 @@ class _ShopPageState extends State<ShopPage> {
     r = await Dio().get('https://a.sirme.tv/mobile/v3/index/top');
     return r;
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 
@@ -81,13 +83,13 @@ class Topic extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ScreenUtil.getInstance().setHeight(500),
+      height: Base.w(315),
       child: GridView.count(
         crossAxisCount: 3,
-        padding: EdgeInsets.symmetric(horizontal: ScreenUtil.getInstance().setWidth(20)),
+        padding: EdgeInsets.symmetric(horizontal: Base.w(10)),
         children: _renderItems(),
-        mainAxisSpacing: ScreenUtil.getInstance().setWidth(3),
-        crossAxisSpacing: ScreenUtil.getInstance().setWidth(3),
+        mainAxisSpacing: Base.w(1.5),
+        crossAxisSpacing: Base.w(1.5),
         childAspectRatio: 0.75,
         physics: NeverScrollableScrollPhysics(),
       )
@@ -98,9 +100,9 @@ class Topic extends StatelessWidget {
     return topics.map((i) {
       return Container(
         decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.black,
-          ),
+          // border: Border.all(
+          //   color: Colors.black,
+          // ),
           borderRadius: BorderRadius.circular(3.0)
         ),
         // alignment: Alignment.topLeft,
@@ -139,8 +141,8 @@ class Ad extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: ScreenUtil.getInstance().setWidth(90),
-              height: ScreenUtil.getInstance().setWidth(90),
+              width: Base.w(45),
+              height: Base.w(45),
               child: Image.network(i['image'], fit: BoxFit.fill,),
             ),
             Text(i['ad_name'])
@@ -167,53 +169,55 @@ class Article extends StatelessWidget {
   Widget _renderArticle(i) {
 
     return Container(
-      // height: ScreenUtil.getInstance().setHeight(320),
       child: Column(
         children: <Widget>[
           Container(
-            height: ScreenUtil.getInstance().setHeight(320),
+            height: Base.h(160),
             child: Image.network(i['file_url']),
           ),
           Container(
-            height: ScreenUtil.getInstance().setHeight(400),
+            height: Base.h(200),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: i['goods_list'].length,
               itemBuilder: (ctx, inx){
-                return Container(
-                  height: ScreenUtil.getInstance().setHeight(400),
-                  child: Column(
-                    
-                    children: <Widget>[
-                      Stack(
-                        children: <Widget>[
-                          Container(
-                            height: ScreenUtil.getInstance().setHeight(200),
-                            width: ScreenUtil.getInstance().setWidth(200),
-                            child: Image.network(i['goods_list'][inx]['goods_img']),
-                          ),
-                          Positioned(
-                            top: ScreenUtil.getInstance().setHeight(50),
-                            left: ScreenUtil.getInstance().setWidth(50),
-                            child: Container(
-                              width: ScreenUtil.getInstance().setWidth(100),
-                              height: ScreenUtil.getInstance().setHeight(100),
-                              child: Image.asset('img/sell_out.png', fit: BoxFit.fill,),
+                return InkWell(
+                  onTap: (){
+                    Navigator.of(ctx).pushNamed('/goods', arguments: i['goods_list'][inx]);
+                  },
+                  child: Container(
+                    height: Base.h(200),
+                    child: Column(
+                      children: <Widget>[
+                        Stack(
+                          children: <Widget>[
+                            Container(
+                              height: Base.h(100),
+                              width: Base.w(100),
+                              child: Image.network(i['goods_list'][inx]['goods_img']),
                             ),
-                          )
-                        ],
-                      ),
-                      Container(
-                        width: ScreenUtil.getInstance().setWidth(200),
-                        height: ScreenUtil.getInstance().setHeight(100),
-                        child: Text(
-                          i['goods_list'][inx]['goods_name'],
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                            Positioned(
+                              top: Base.h(25),
+                              left: Base.w(25),
+                              child: Container(
+                                width: Base.w(50),
+                                height: Base.h(50),
+                                child: Image.asset('img/sell_out.png', fit: BoxFit.fill,),
+                              ),
+                            )
+                          ],
                         ),
-                      ),
-                      
-                    ],
+                        Container(
+                          width: Base.w(100),
+                          height: Base.h(50),
+                          child: Text(
+                            i['goods_list'][inx]['goods_name'],
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

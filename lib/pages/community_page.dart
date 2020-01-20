@@ -13,27 +13,25 @@ class LocalState extends State<CommunityPage> {
   String input = '';
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       body: Container(
         child: Column(
           children: <Widget>[
             TextField(
               // controller: TextEditingController(),
-              onChanged: (val){
+              onChanged: (val) {
                 setState(() {
                   input = val;
                 });
               },
               decoration: InputDecoration(
                 helperText: 'pls input',
-                
               ),
             ),
             Divider(),
             RaisedButton(
               child: Text('get data'),
-              onPressed: (){
+              onPressed: () {
                 _getData(input);
               },
             ),
@@ -42,7 +40,29 @@ class LocalState extends State<CommunityPage> {
               child: SingleChildScrollView(
                 child: Text(txt),
               ),
-            )
+            ),
+            Container(
+              child: RaisedButton(
+                child: Text('tim'),
+                onPressed: () async {
+                  Response r = await Dio().post(
+                      'https://m.sirme.tv/mobile/api/friends/UserSig',
+                      data: {
+                        'podcast_id': '200',
+                        'token': 'wminie6f347ce9ed4c3d35caa95c6986657f4'
+                      });
+                  print(r);
+                },
+              ),
+            ),
+            Container(
+              child: RaisedButton(
+                child: Text('login'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/login');
+                },
+              ),
+            ),
           ],
         ),
       ),
