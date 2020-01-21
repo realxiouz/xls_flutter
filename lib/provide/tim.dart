@@ -5,7 +5,7 @@ class TimProvide extends ChangeNotifier {
   
   List<dynamic> allConversation = [];
   List<dynamic> currentMessageList = [];
-  int currentPeer =  2434830;
+  String currentPeer =  '2434830';
 
   void updateAllConversation(data) {
     allConversation = data;

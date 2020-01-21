@@ -12,6 +12,7 @@ import './pages/init/index.dart';
 import './pages/tim/message.dart';
 import './pages/tim/chat.dart';
 import 'pages/tim/demo.dart';
+import './pages/photo/index.dart';
 
 void main() {
   Providers providers = Providers();
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
         '/tim/message': (context) => MessagePage(),
         '/tim/chat': (context) => ChatPage(),
         '/tim/demo': (context) => DemoPage(),
+        '/photo': (context) => PhotoPage(),
       },
     );
   }

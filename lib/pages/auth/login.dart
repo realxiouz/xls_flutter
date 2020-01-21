@@ -97,7 +97,15 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                 ),
-              )
+              ),
+              Container(
+                child: InkWell(
+                  onTap: (){
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text('去注册'),
+                ),
+              ),
             ],
           ),
         ),
