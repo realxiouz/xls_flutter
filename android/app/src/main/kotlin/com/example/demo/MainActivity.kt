@@ -1,4 +1,4 @@
-package com.example.demo
+package tv.sirme.live
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

@@ -1,4 +1,5 @@
 import 'package:demo/pages/auth/login.dart';
+import 'package:demo/pages/map/demo.dart';
 import 'package:demo/pages/shop/goods/index.dart';
 import 'package:demo/provide/me.dart';
 import 'package:demo/provide/tim.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
         '/tim/chat': (context) => ChatPage(),
         '/tim/demo': (context) => DemoPage(),
         '/photo': (context) => PhotoPage(),
+        '/map/demo': (context) => MapDemo()
       },
     );
   }

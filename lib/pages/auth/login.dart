@@ -4,9 +4,14 @@ import 'dart:convert';
 import 'package:demo/common/base.dart';
 import 'package:demo/common/sp_util.dart';
 import 'package:demo/provide/me.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:demo/common/request.dart';
 import 'package:provide/provide.dart';
+import 'package:fluwx/fluwx.dart' as fluwx;
+import 'package:demo/common/const.dart';
+
+import 'package:crypto/crypto.dart';
 
 class Login extends StatefulWidget {
   Login({Key key}) : super(key: key);
@@ -23,6 +28,39 @@ class _LoginState extends State<Login> {
     'username': '',
     'password': '',
   };
+
+  var imgs = [
+    'https://v4oss.sirme.tv/data/attached/qrcode/20200317/user_share_vip_98592_150.jpg',
+    'https://v4oss.sirme.tv/data/attached/qrcode/20200317/user_share_vip_98592_151.jpg',
+    'https://v4oss.sirme.tv/data/attached/qrcode/20200317/user_share_vip_98592_152.jpg'
+  ];
+
+  int curInx = 0;
+
+  String qrCodePath;
+
+  @override
+  void initState() {
+    super.initState();
+    fluwx.registerWxApi(appId: Const.WECHAT_APPID).then((data) {
+      print(data['platform']);
+    });
+
+    fluwx.onAuthGotQRCode.listen((img) {
+      print(img);
+      setState(() {
+        qrCodePath = img.toString();
+      });
+    });
+
+    fluwx.responseFromAuth.listen((data) {
+      print(data.toString());
+    }, onError: (e) {
+      print(e);
+    }, onDone: () {
+      print('done');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +97,7 @@ class _LoginState extends State<Login> {
                 onChanged: (val) {
                   formData['username'] = val;
                 },
+                keyboardType: TextInputType.datetime,
               ),
               TextField(
                 maxLength: 16,
@@ -93,17 +132,64 @@ class _LoginState extends State<Login> {
                       ),
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(Base.w(20))
-                    ),
+                        borderRadius: BorderRadius.circular(Base.w(20))),
                   ),
                 ),
               ),
               Container(
                 child: InkWell(
-                  onTap: (){
+                  onTap: () {
                     Navigator.pushNamed(context, '/register');
                   },
                   child: Text('去注册'),
+                ),
+              ),
+              InkWell(
+                onTap: _handleWechat,
+                child: Icon(
+                  Icons.watch,
+                  size: Base.w(50),
+                ),
+              ),
+              InkWell(
+                onTap: _handleGit,
+                child: Icon(
+                  Icons.cake,
+                  size: Base.w(50),
+                ),
+              ),
+              Container(
+                width: Base.w(375),
+                height: Base.w(200),
+                child: PageView.builder(
+                  itemBuilder: (ctx, inx) {
+                    return Container(
+                      // child: Image.network(imgs[inx], fit: BoxFit.fill,),
+                      margin: EdgeInsets.symmetric(horizontal: Base.w(6)),
+                      // padding: EdgeInsets.symmetric(horizontal: Base.w(6)),
+                      decoration: BoxDecoration(
+                        // border: Border.all(),
+                        borderRadius: BorderRadius.all(Radius.circular(Base.w(10))),
+                        image: DecorationImage(
+                          image: NetworkImage(imgs[inx]),
+                          fit: BoxFit.fill
+                        )
+                      ),
+                      // height: Base.w(400),
+                    );
+                  },
+                  itemCount: imgs.length,
+                  controller: PageController(
+                    viewportFraction: 0.8,
+                    
+                  ),
+                  scrollDirection: Axis.horizontal,
+                  onPageChanged: (inx) {
+                    setState(() {
+                      curInx = inx;
+                    });
+                  },
+                  // physics: PageScrollPhysics(),
                 ),
               ),
             ],
@@ -135,5 +221,82 @@ class _LoginState extends State<Login> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _handleWechat() async {
+    // fluwx.authWeChatByQRCode(appId: Const.WECHAT_APPID, scope: 'noncestr', nonceStr: 'noncestr', timeStamp: null, signature: null);
+    // dynamic data = await DioUtils.get('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${Const.WECHAT_APPID}&secret=${Const.WECHAT_APPSECRECT}');
+    // print(data);
+    // String access_token = '31_IaaoDlkrtFE7rXWhaTg9qU788k_PrTg3-AxqboHquBDyTVcSdydWpa5rFIVoCNKrIiJHAM36zaPtNistYnHMDswq6DHzu0EfiqERoYOcQ6C5hzhxxw7nlaE_UbkoBSD2lz_1eUQxa4qpf7FcVLPbAEADTX';
+
+    // dynamic data = await DioUtils.get('https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=$access_token&type=2');
+
+    String ticket =
+        'ZIBfsbn4HgG7s18-ojtsIpstjfjzZrtso4QmkP5kXThdePfF4EOY1XeZo_8SPTpa3ho11yrBhTOeKpRp0pfIEQ';
+
+    int timestamp = DateTime.now().microsecondsSinceEpoch ~/ 1000;
+
+    // Map<String, dynamic> map = {
+    //   'appid': Const.WECHAT_APPID,
+    //   'noncestr': 'helloworld',
+    //   'sdk_ticket': ticket,
+    //   'timestamp':  timestamp
+    // };
+
+    String temp =
+        'appid=${Const.WECHAT_APPID}&noncestr=helloworld&sdk_ticket=$ticket&timestamp=$timestamp';
+    var bytes = utf8.encode(temp);
+    var res = sha1.convert(bytes);
+    print(res);
+
+    dynamic data = await fluwx.authWeChatByQRCode(
+        appId: Const.WECHAT_APPID,
+        scope: 'noncestr',
+        nonceStr: 'helloworld',
+        timeStamp: timestamp.toString(),
+        signature: res.toString());
+    print(data);
+
+    dynamic d = await fluwx.sendWeChatAuth(
+        // openId: Const.WECHAT_APPID,
+        scope: 'snsapi_userinfo',
+        state: "wechat_sdk_demo_test");
+
+    print(d);
+  }
+
+  void _handleGit() {
+    String username = 'realxiouz@gmail.com';
+    String pw = 'real20050607';
+    String temp = '$username:$pw';
+
+    var bytes = utf8.encode(temp);
+    print(bytes);
+    var res = base64Encode(bytes);
+    print(res);
+    var opt = BaseOptions(headers: {'Authorization': 'Basic $res'});
+    var dio = Dio(opt);
+
+    // auth token
+    // dio.post('https://api.github.com/authorizations', data: {
+    //   "scopes": ['user', 'repo', 'gist', 'notifications'],
+    //   "note": "admin_script",
+    //   "client_id": '14e0e049eb3fd4e101bb',
+    //   "client_secret": 'a1a4fe6f3d2de4a48a6fa57da39136aa15486988'
+    // }).then((r){
+    //   print(r);
+
+    // })
+    // .catchError((e){
+
+    //   print(e);
+    // });
+
+    // event
+    dio.get('https://api.github.com/events').then((r) {
+      print(r);
+    }).catchError((e) {
+      print(e);
+    });
   }
 }
