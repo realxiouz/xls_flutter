@@ -34,12 +34,12 @@ dependencies:
   webview_flutter: ^0.3.19+2
   flutter_webview_plugin: ^0.3.10+1
   flutter_html: ^0.11.1
-  dim: ^0.2.8
+  # dim: ^0.2.8
   image_picker: ^0.6.3+1
   photo_view: ^0.9.1
   fluwx:
   crypto:
-  amap_map_fluttify: ^0.18.0+481e45c
+  # amap_map_fluttify: ^0.18.0+481e45c
 
 dev_dependencies:
   flutter_test:

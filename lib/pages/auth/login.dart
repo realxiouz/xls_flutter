@@ -1,4 +1,4 @@
-import 'dart:async';
+// import 'dart:async';
 import 'dart:convert';
 
 import 'package:demo/common/base.dart';
@@ -43,23 +43,39 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     fluwx.registerWxApi(appId: Const.WECHAT_APPID).then((data) {
-      print(data['platform']);
+      if (data) {
+        print('fluwx init success!');
+      }
     });
 
-    fluwx.onAuthGotQRCode.listen((img) {
-      print(img);
-      setState(() {
-        qrCodePath = img.toString();
-      });
-    });
+    // fluwx.onAuthGotQRCode.listen((img) {
+    //   print(img);
+    //   setState(() {
+    //     qrCodePath = img.toString();
+    //   });
+    // });
 
-    fluwx.responseFromAuth.listen((data) {
-      print(data.toString());
-    }, onError: (e) {
-      print(e);
-    }, onDone: () {
-      print('done');
+    fluwx.weChatResponseEventHandler.listen((r) async{
+      // print(r.errStr);
+      // print(r.errCode);
+      if (r is fluwx.WeChatAuthResponse) {
+        print(r.code);
+        // print('https://api.weixin.qq.com/sns/oauth2/access_token?appid=${Const.WECHAT_APPID}&secret=${Const.WECHAT_APPSECRECT}&code=${r.code}&grant_type=authorization_code');
+        dynamic data = await Dio().get('https://api.weixin.qq.com/sns/oauth2/access_token?appid=${Const.WECHAT_APPID}&secret=${Const.WECHAT_APPSECRECT}&code=${r.code}&grant_type=authorization_code');
+        print(data);
+      }
+      
     });
+    
+    // fluwx.auth
+
+    // fluwx.responseFromAuth.listen((data) {
+    //   print(data.toString());
+    // }, onError: (e) {
+    //   print(e);
+    // }, onDone: () {
+    //   print('done');
+    // });
   }
 
   @override
@@ -146,10 +162,7 @@ class _LoginState extends State<Login> {
               ),
               InkWell(
                 onTap: _handleWechat,
-                child: Icon(
-                  Icons.watch,
-                  size: Base.w(50),
-                ),
+                child: Text('wechat'),
               ),
               InkWell(
                 onTap: _handleGit,
@@ -192,6 +205,23 @@ class _LoginState extends State<Login> {
                   // physics: PageScrollPhysics(),
                 ),
               ),
+              Container(
+                child: FlatButton(child: Text('map'), onPressed: (){
+                  Navigator.pushNamed(context, '/map/demo');
+                },),
+              ),
+              Container(
+                padding: EdgeInsets.all(Base.w(20)),
+                child: FlatButton(child: Text('wechat-share-img'), onPressed: (){
+                  fluwx.WeChatShareImageModel model = fluwx.WeChatShareImageModel(
+                    fluwx.WeChatImage.network('http://imgcache.gtimg.cn/ACT/svip_act/act_img/public/202003/1584585682_477x266.jpg'),
+                    title: '呵呵',
+                    description: 'miaoshu',
+                    scene: fluwx.WeChatScene.SESSION
+                  );
+                  fluwx.shareToWeChat(model);
+                },),
+              ),
             ],
           ),
         ),
@@ -225,16 +255,17 @@ class _LoginState extends State<Login> {
 
   void _handleWechat() async {
     // fluwx.authWeChatByQRCode(appId: Const.WECHAT_APPID, scope: 'noncestr', nonceStr: 'noncestr', timeStamp: null, signature: null);
-    // dynamic data = await DioUtils.get('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${Const.WECHAT_APPID}&secret=${Const.WECHAT_APPSECRECT}');
-    // print(data);
-    // String access_token = '31_IaaoDlkrtFE7rXWhaTg9qU788k_PrTg3-AxqboHquBDyTVcSdydWpa5rFIVoCNKrIiJHAM36zaPtNistYnHMDswq6DHzu0EfiqERoYOcQ6C5hzhxxw7nlaE_UbkoBSD2lz_1eUQxa4qpf7FcVLPbAEADTX';
+    // dynamic access_token = await DioUtils.get('https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${Const.WECHAT_APPID}&secret=${Const.WECHAT_APPSECRECT}');
+    // print(access_token);
+    // String access_token = '31_1FyNLWcnfTzxbQUCp2zjlqq4Oq7njPpkhen7aYYzI-HhinZwCVmEO_8plYGO4WLw-rPu3LX9I4TzaaL00q2R869p0DgVvXOmwlrejnwiwgWZKCuSV5fjZe00H-s2PPxFoWzgWwIVSE9YHZcfOCCiADAYMM';
 
-    // dynamic data = await DioUtils.get('https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=$access_token&type=2');
+    // dynamic ticket = await DioUtils.get('https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=$access_token&type=2');
+    // print(ticket);
 
-    String ticket =
-        'ZIBfsbn4HgG7s18-ojtsIpstjfjzZrtso4QmkP5kXThdePfF4EOY1XeZo_8SPTpa3ho11yrBhTOeKpRp0pfIEQ';
+    // String ticket =
+    //     'ZIBfsbn4HgG7s18-ojtsIpstjfjzZrtso4QmkP5kXTgS2bm4XJObQdi0MCiae_ByEcHzRkMN1WWj1gsFyGfaKQ';
 
-    int timestamp = DateTime.now().microsecondsSinceEpoch ~/ 1000;
+    // int timestamp = DateTime.now().microsecondsSinceEpoch ~/ 1000;
 
     // Map<String, dynamic> map = {
     //   'appid': Const.WECHAT_APPID,
@@ -243,26 +274,28 @@ class _LoginState extends State<Login> {
     //   'timestamp':  timestamp
     // };
 
-    String temp =
-        'appid=${Const.WECHAT_APPID}&noncestr=helloworld&sdk_ticket=$ticket&timestamp=$timestamp';
-    var bytes = utf8.encode(temp);
-    var res = sha1.convert(bytes);
-    print(res);
+    // String temp =
+    //     'appid=${Const.WECHAT_APPID}&noncestr=helloworld&sdk_ticket=$ticket&timestamp=$timestamp';
+    // var bytes = utf8.encode(temp);
+    // var res = sha1.convert(bytes);
+    // print(res);
 
-    dynamic data = await fluwx.authWeChatByQRCode(
-        appId: Const.WECHAT_APPID,
-        scope: 'noncestr',
-        nonceStr: 'helloworld',
-        timeStamp: timestamp.toString(),
-        signature: res.toString());
-    print(data);
+    // dynamic data = await fluwx.authWeChatByQRCode(
+    //     appId: Const.WECHAT_APPID,
+    //     scope: 'noncestr',
+    //     nonceStr: 'helloworld',
+    //     timeStamp: timestamp.toString(),
+    //     signature: res.toString());
+    // print(data);
 
     dynamic d = await fluwx.sendWeChatAuth(
         // openId: Const.WECHAT_APPID,
         scope: 'snsapi_userinfo',
         state: "wechat_sdk_demo_test");
 
-    print(d);
+    // print(d);
+    // 'wxb7c5a84d2e6663db'
+    // fluwx.launchWeChatMiniProgram(username: 'gh_a95feff0db46');
   }
 
   void _handleGit() {

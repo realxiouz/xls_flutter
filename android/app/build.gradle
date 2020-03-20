@@ -46,6 +46,22 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    //签名
+    signingConfigs {
+        debug {
+            storeFile file("fanwe.keystore")
+            storePassword "fanwe99cnlin"
+            keyAlias "fanwe"
+            keyPassword "fanwe99cnlin"
+        }
+        release {
+            storeFile file("fanwe.keystore")
+            storePassword "fanwe99cnlin"
+            keyAlias "fanwe"
+            keyPassword "fanwe99cnlin"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
